@@ -193,6 +193,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUserStats = async (action: 'post' | 'prayer' | 'guidance' | 'comment') => {
+    if (!user || !profile) return;
+
+    let updates: Partial<Profile> = {};
+    let xpGain = 0;
+
+    switch (action) {
+      case 'post':
+        updates.posts_count = (profile.posts_count || 0) + 1;
+        xpGain = 10;
+        break;
+      case 'prayer':
+        updates.prayers_given = (profile.prayers_given || 0) + 1;
+        xpGain = 5;
+        break;
+      case 'guidance':
+        updates.helpful_guidance = (profile.helpful_guidance || 0) + 1;
+        xpGain = 15;
+        break;
+      case 'comment':
+        xpGain = 3;
+        break;
+    }
+
+    const newXp = (profile.xp || 0) + xpGain;
+    const newLevel = Math.floor(newXp / 500) + 1;
+    
+    updates.xp = newXp;
+    updates.level = newLevel;
+    
+    // Check if user can create circles
+    if (newXp >= 1000 && (profile.prayers_given || 0) >= 50 && (profile.helpful_guidance || 0) >= 10) {
+      updates.can_create_circle = true;
+    }
+
+    await updateProfile(updates);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -203,6 +241,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signOut,
         updateProfile,
+        updateUserStats,
       }}
     >
       {children}

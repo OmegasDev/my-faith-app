@@ -21,6 +21,7 @@ interface CreatePostModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: () => void;
+  circleId?: string;
 }
 
 const { width } = Dimensions.get('window');
@@ -38,14 +39,14 @@ const postBackgrounds: PostBackground[] = [
   { type: 'gradient', value: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', colors: ['#fa709a', '#fee140'] },
 ];
 
-export default function CreatePostModal({ visible, onClose, onSubmit }: CreatePostModalProps) {
+export default function CreatePostModal({ visible, onClose, onSubmit, circleId }: CreatePostModalProps) {
   const [content, setContent] = useState('');
   const [postType, setPostType] = useState<PostType>('normal');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [selectedBackground, setSelectedBackground] = useState<PostBackground>(postBackgrounds[0]);
   const [loading, setLoading] = useState(false);
   
-  const { user } = useAuth();
+  const { user, updateUserStats } = useAuth();
   const { theme } = useTheme();
 
   const handleSubmit = async () => {
@@ -62,19 +63,37 @@ export default function CreatePostModal({ visible, onClose, onSubmit }: CreatePo
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('posts')
-        .insert({
-          user_id: user.id,
-          content: content.trim(),
-          post_type: postType,
-          is_anonymous: isAnonymous,
-          background_type: selectedBackground.type,
-          background_value: selectedBackground.value,
-          background_colors: selectedBackground.colors || null,
-        });
+      if (circleId) {
+        // Create circle message
+        const { error } = await supabase
+          .from('circle_messages')
+          .insert({
+            circle_id: circleId,
+            user_id: user.id,
+            content: content.trim(),
+            message_type: 'text',
+          });
+        
+        if (error) throw error;
+      } else {
+        // Create regular post
+        const { error } = await supabase
+          .from('posts')
+          .insert({
+            user_id: user.id,
+            content: content.trim(),
+            post_type: postType,
+            is_anonymous: isAnonymous,
+            background_type: selectedBackground.type,
+            background_value: selectedBackground.value,
+            background_colors: selectedBackground.colors || null,
+          });
+        
+        if (error) throw error;
+      }
 
-      if (error) throw error;
+      // Update user stats
+      await updateUserStats('post');
 
       // Reset form
       setContent('');
@@ -85,10 +104,10 @@ export default function CreatePostModal({ visible, onClose, onSubmit }: CreatePo
       onSubmit();
       onClose();
       
-      Alert.alert('Success', 'Your post has been created!');
+      Alert.alert('Success', circleId ? 'Your message has been posted to the circle!' : 'Your post has been created!');
     } catch (error) {
       console.error('Error creating post:', error);
-      Alert.alert('Error', 'Failed to create post. Please try again.');
+      Alert.alert('Error', circleId ? 'Failed to post message. Please try again.' : 'Failed to create post. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -129,7 +148,7 @@ export default function CreatePostModal({ visible, onClose, onSubmit }: CreatePo
             <X size={24} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, isDark ? styles.darkText : styles.lightText]}>
-            Create Post
+            {circleId ? 'Post to Circle' : 'Create Post'}
           </Text>
           <TouchableOpacity
             onPress={handleSubmit}
@@ -146,7 +165,8 @@ export default function CreatePostModal({ visible, onClose, onSubmit }: CreatePo
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Post Type Selection */}
+          {/* Post Type Selection - Only for regular posts */}
+          {!circleId && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
               Post Type
@@ -176,8 +196,10 @@ export default function CreatePostModal({ visible, onClose, onSubmit }: CreatePo
               ))}
             </ScrollView>
           </View>
+          )}
 
-          {/* Anonymous Toggle */}
+          {/* Anonymous Toggle - Only for regular posts */}
+          {!circleId && (
           <View style={styles.section}>
             <View style={styles.anonymousRow}>
               <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
@@ -204,6 +226,7 @@ export default function CreatePostModal({ visible, onClose, onSubmit }: CreatePo
               </Text>
             )}
           </View>
+          )}
 
           {/* Background Selection */}
           <View style={styles.section}>

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, Plus, User, Users, MessageCircle } from 'lucide-react-native';
+import { Chrome as Home, Plus, Users, MessageCircle, BookOpen, User } from 'lucide-react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function TabLayout() {
@@ -37,6 +37,15 @@ export default function TabLayout() {
           title: 'Create',
           tabBarIcon: ({ size, color }) => (
             <Plus size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="myspace"
+        options={{
+          title: 'My Space',
+          tabBarIcon: ({ size, color }) => (
+            <BookOpen size={size} color={color} />
           ),
         }}
       />
