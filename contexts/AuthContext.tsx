@@ -76,9 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', userId) // ✅ this is the correct field
         .single();
-
+  
       if (error) throw error;
       if (mounted.current) setProfile(data);
     } catch (error) {
@@ -87,13 +87,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (mounted.current) setLoading(false);
     }
   };
+  
+  
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
         console.log('❌ Sign in error:', error);
@@ -118,12 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: name,
-            username,
-          },
-        },
       });
 
       console.log('📥 Signup result:', data);
@@ -134,44 +127,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!data.user) {
-        if ((error as any)?.message?.includes('User already registered')) {
-          Alert.alert('Account Exists', 'This email is already registered. Please sign in.');
-          return { error };
-        }
-      
         Alert.alert('Signup Error', 'No user returned. Try again or use a different email.');
         return { error: { message: 'No user object returned' } };
       }
-      
 
-      const newProfile = {
-        id: data.user.id,
-        name,
-        username,
-        email,
-        xp: 0,
-        level: 1,
-        avatar_url: null,
-        join_date: new Date().toISOString(),
-        posts_count: 0,
-        prayers_given: 0,
-        helpful_guidance: 0,
-        daily_streak: 0,
-        can_create_circle: false,
-      };
+      // Give Supabase a second to finalize the user creation
+      setTimeout(async () => {
+        const newProfile = {
+          id: data.user?.id ?? '',
+          name,
+          username,
+          email,
+          xp: 0,
+          level: 1,
+          avatar_url: null,
+          join_date: new Date().toISOString(),
+          posts_count: 0,
+          prayers_given: 0,
+          helpful_guidance: 0,
+          daily_streak: 0,
+          can_create_circle: false,
+        };
 
-      const { error: profileError } = await supabase.from('profiles').insert(newProfile);
+        const { error: profileError } = await supabase.from('profiles').insert(newProfile);
 
-      if (profileError) {
-        console.log('❌ Profile insert error:', profileError);
-        Alert.alert('Profile Error', profileError.message);
-        return { error: profileError };
-      }
+        if (profileError) {
+          console.log('❌ Profile insert error:', profileError);
+          Alert.alert('Profile Error', profileError.message);
+        } else {
+          console.log('✅ Profile created');
+        }
 
-      await supabase.from('user_preferences').insert({
-        user_id: data.user.id,
-        theme: 'dark',
-      });
+        // Optional user preferences
+        if (data.user) {
+          await supabase.from('user_preferences').insert({
+            user_id: data.user.id,
+            theme: 'dark',
+          });
+        }
+
+      }, 1000); // Delay to avoid insert race
 
       return { error: null };
     } catch (err: any) {
@@ -222,4 +217,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
 
