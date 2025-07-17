@@ -24,6 +24,8 @@ export default function LoginScreen() {
   const { signIn, signUp } = useAuth();
 
   const handleAuth = async () => {
+    console.log('🚀 Starting authentication process...');
+    
     if (!email.trim() || !password.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -38,31 +40,33 @@ export default function LoginScreen() {
 
     try {
       if (isLogin) {
+        console.log('📧 Signing in with email:', email);
         const { error } = await signIn(email, password);
       
-        // 🧪 Log what Supabase returns
-        console.log("SIGN IN RESULT:", { error });
-      
         if (error) {
+          console.log('❌ Login error:', error.message);
           Alert.alert('Login Failed', error.message);
           return;
         }
       
-        console.log("✅ Login Success!");
+        console.log('✅ Login successful, navigating to app...');
+        router.replace('/(tabs)');
       }
        else {
+        console.log('📝 Creating new account for:', email);
         const { error } = await signUp(email, password, name, username);
         if (error) {
+          console.log('❌ Signup error:', error.message);
           Alert.alert('Error', error.message);
           return;
         }
+        console.log('✅ Account created successfully');
         Alert.alert('Success', 'Account created successfully! Please sign in.');
         setIsLogin(true);
         return;
       }
-      
-      router.replace('/(tabs)');
     } catch (error) {
+      console.log('💥 Authentication crash:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);

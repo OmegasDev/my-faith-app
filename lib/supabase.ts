@@ -1,12 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Missing Supabase environment variables!');
+  console.log('Please check your .env file and make sure you have:');
+  console.log('EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co');
+  console.log('EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key');
+  throw new Error('Supabase environment variables are not configured');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
+    detectSessionInUrl: false,
   },
 });
 
