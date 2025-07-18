@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, Plus, Users, MessageCircle, BookOpen, User } from 'lucide-react-native';
+import { LayoutDashboard, Plus, User, MessageCircle, BookOpen, Users } from 'lucide-react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function TabLayout() {
@@ -27,7 +27,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ size, color }) => (
-            <Home size={size} color={color} />
+            <LayoutDashboard color={color} size={size} />
           ),
         }}
       />
@@ -36,7 +36,7 @@ export default function TabLayout() {
         options={{
           title: 'Create',
           tabBarIcon: ({ size, color }) => (
-            <Plus size={size} color={color} />
+            <Plus color={color} size={size} />
           ),
         }}
       />
@@ -45,7 +45,7 @@ export default function TabLayout() {
         options={{
           title: 'My Space',
           tabBarIcon: ({ size, color }) => (
-            <BookOpen size={size} color={color} />
+            <BookOpen color={color} size={size} />
           ),
         }}
       />
@@ -54,7 +54,7 @@ export default function TabLayout() {
         options={{
           title: 'Circles',
           tabBarIcon: ({ size, color }) => (
-            <Users size={size} color={color} />
+            <Users color={color} size={size} />
           ),
         }}
       />
@@ -63,7 +63,7 @@ export default function TabLayout() {
         options={{
           title: 'Messages',
           tabBarIcon: ({ size, color }) => (
-            <MessageCircle size={size} color={color} />
+            <MessageCircle color={color} size={size} />
           ),
         }}
       />
@@ -72,10 +72,11 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ size, color }) => (
-            <User size={size} color={color} />
+            <User color={color} size={size} />
           ),
         }}
       />
     </Tabs>
   );
 }
+

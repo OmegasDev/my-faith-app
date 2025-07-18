@@ -105,7 +105,12 @@ export default function CirclesScreen() {
         .eq('circle_id', circleId);
 
       if (error) throw error;
-      setCircleMembers(data || []);
+      setCircleMembers(
+        (data || []).map(member => ({
+          ...member,
+          profiles: Array.isArray(member.profiles) ? member.profiles[0] : member.profiles,
+        }))
+      );
     } catch (error) {
       console.error('Error fetching circle members:', error);
     }
@@ -129,7 +134,12 @@ export default function CirclesScreen() {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setCircleMessages(data || []);
+      setCircleMessages(
+        (data || []).map(message => ({
+          ...message,
+          profiles: Array.isArray(message.profiles) ? message.profiles[0] : message.profiles,
+        }))
+      );
     } catch (error) {
       console.error('Error fetching circle messages:', error);
     }

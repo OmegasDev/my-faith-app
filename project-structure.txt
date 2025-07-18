@@ -1,0 +1,49 @@
+.
+├── app
+│   ├── _layout.tsx
+│   ├── login.tsx
+│   ├── +not-found.tsx
+│   └── (tabs)
+│       ├── circles.tsx
+│       ├── create.tsx
+│       ├── index.tsx
+│       ├── _layout.tsx
+│       ├── messages.tsx
+│       ├── myspace.tsx
+│       └── profile.tsx
+├── app.json
+├── assets
+│   └── images
+│       ├── favicon.png
+│       ├── icon.png
+│       ├── Leonardo_Phoenix_10_Create_a_captivating_brand_logo_for_a_soci_3.jpg
+│       └── Screenshot_20250715-155850_Lite.jpg
+├── components
+│   ├── CreatePostModal.tsx
+│   ├── FeedPostCard.tsx
+│   ├── ThemeModal.tsx
+│   └── UserProfileCard.tsx
+├── contexts
+│   ├── AuthContext.tsx
+│   └── ThemeContext.tsx
+├── data
+│   └── mockData.ts
+├── expo-env.d.ts
+├── hooks
+│   └── useFrameworkReady.ts
+├── lib
+│   └── supabase.ts
+├── package.json
+├── package-lock.json
+├── project-structure.txt
+├── supabase
+│   └── migrations
+│       ├── 20250715174101_morning_wood.sql
+│       └── 20250716203022_jade_moon.sql
+├── tsconfig.json
+├── types
+│   └── index.ts
+└── utils
+    └── xpCalculator.ts
+
+13 directories, 33 files

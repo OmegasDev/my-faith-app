@@ -27,6 +27,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string, username: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  updateUserStats: (action: 'post' | 'prayer' | 'guidance' | 'comment') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
