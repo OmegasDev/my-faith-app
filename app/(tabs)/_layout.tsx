@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { LayoutDashboard, Plus, User, MessageCircle, BookOpen, Users } from 'lucide-react-native';
+import { LayoutDashboard, Plus, User, MessageCircle, BookOpen, Users, Bell, UserSearch } from 'lucide-react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function TabLayout() {
@@ -41,6 +41,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="people"
+        options={{
+          title: 'People',
+          tabBarIcon: ({ size, color }) => (
+            <UserSearch color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="myspace"
         options={{
           title: 'My Space',
@@ -64,6 +73,15 @@ export default function TabLayout() {
           title: 'Messages',
           tabBarIcon: ({ size, color }) => (
             <MessageCircle color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: 'Notifications',
+          tabBarIcon: ({ size, color }) => (
+            <Bell color={color} size={size} />
           ),
         }}
       />

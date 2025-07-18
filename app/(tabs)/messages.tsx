@@ -9,11 +9,12 @@ import {
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, MessageCircle } from 'lucide-react-native';
+import { Search, MessageCircle, Plus } from 'lucide-react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { formatTimeAgo } from '../../utils/xpCalculator';
+import { router } from 'expo-router';
 
 interface DirectMessage {
   id: string;
@@ -175,6 +176,13 @@ export default function MessagesScreen() {
       <Text style={[styles.emptyDescription, isDark ? styles.darkSubtext : styles.lightSubtext]}>
         Start conversations with other believers in your faith community
       </Text>
+      <TouchableOpacity
+        style={styles.startConversationButton}
+        onPress={() => router.push('/people')}
+      >
+        <Plus size={20} color="#FFFFFF" />
+        <Text style={styles.startConversationText}>Start Conversation</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -189,6 +197,12 @@ export default function MessagesScreen() {
         <Text style={[styles.headerTitle, isDark ? styles.darkText : { color: '#1877F2' }]}>
           Messages
         </Text>
+        <TouchableOpacity
+          style={styles.newMessageButton}
+          onPress={() => router.push('/people')}
+        >
+          <Plus size={20} color="#667eea" />
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.searchContainer, isDark ? styles.darkSearchContainer : styles.lightSearchContainer]}>
@@ -374,6 +388,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 40,
+    marginBottom: 24,
+  },
+  startConversationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#667eea',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    gap: 8,
+  },
+  startConversationText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  newMessageButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
   },
   darkText: {
     color: '#FFFFFF',

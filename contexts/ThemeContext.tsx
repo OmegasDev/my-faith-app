@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
@@ -14,23 +15,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [hasShownThemeModal, setHasShownThemeModal] = useState(false);
   const { user } = useAuth();
   const mounted = useRef(true);
 
   useEffect(() => {
     mounted.current = true;
+    loadStoredTheme();
     
     if (user) {
       loadUserTheme();
-      // Show theme modal after 5 seconds
-      const timer = setTimeout(() => {
-        if (mounted.current) {
-          setShowThemeModal(true);
-        }
-      }, 5000);
-      return () => {
-        clearTimeout(timer);
-      };
+      checkShowThemeModal();
     }
     
     return () => {
@@ -38,6 +33,33 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user]);
 
+  const loadStoredTheme = async () => {
+    try {
+      const storedTheme = await AsyncStorage.getItem('theme');
+      const hasShown = await AsyncStorage.getItem('hasShownThemeModal');
+      
+      if (storedTheme && mounted.current) {
+        setTheme(storedTheme as 'light' | 'dark');
+      }
+      
+      if (hasShown && mounted.current) {
+        setHasShownThemeModal(true);
+      }
+    } catch (error) {
+      console.error('Error loading stored theme:', error);
+    }
+  };
+
+  const checkShowThemeModal = async () => {
+    if (!hasShownThemeModal) {
+      const timer = setTimeout(() => {
+        if (mounted.current) {
+          setShowThemeModal(true);
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  };
   const loadUserTheme = async () => {
     if (!user) return;
 
@@ -49,6 +71,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     if (data?.theme && mounted.current) {
       setTheme(data.theme as 'light' | 'dark');
+      await AsyncStorage.setItem('theme', data.theme);
     }
   };
 
@@ -58,6 +81,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setTheme(newTheme);
     }
 
+    // Store theme locally
+    await AsyncStorage.setItem('theme', newTheme);
     if (user) {
       await supabase
         .from('user_preferences')
@@ -68,12 +93,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleThemeModalClose = async () => {
+    setShowThemeModal(false);
+    setHasShownThemeModal(true);
+    await AsyncStorage.setItem('hasShownThemeModal', 'true');
+  };
   return (
     <ThemeContext.Provider value={{
       theme,
       toggleTheme,
       showThemeModal,
-      setShowThemeModal,
+      setShowThemeModal: handleThemeModalClose,
     }}>
       {children}
     </ThemeContext.Provider>

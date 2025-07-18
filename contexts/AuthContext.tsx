@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Alert } from 'react-native';
+import { router } from 'expo-router';
 import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(true);
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -46,8 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         if (session?.user) {
           fetchProfile(session.user.id);
+          // Auto-navigate to app if user is already signed in
+          router.replace('/(tabs)');
         } else {
           setLoading(false);
+          setInitializing(false);
         }
       }
     });
@@ -58,10 +63,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(session?.user ?? null);
           if (session?.user) {
             await fetchProfile(session.user.id);
+            if (_event === 'SIGNED_IN') {
+              router.replace('/(tabs)');
+            }
           } else {
             setProfile(null);
             setLoading(false);
+            if (_event === 'SIGNED_OUT') {
+              router.replace('/login');
+            }
           }
+          setInitializing(false);
         }
       }
     );
@@ -87,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       if (mounted.current) setLoading(false);
     }
+        setInitializing(false);
   };
   
   
@@ -179,7 +192,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      setProfile(null);
+      router.replace('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      Alert.alert('Error', 'Failed to sign out');
+    }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -238,7 +260,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         profile,
-        loading,
+        loading: loading || initializing,
         signIn,
         signUp,
         signOut,
